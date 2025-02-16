@@ -8,6 +8,7 @@ namespace MyApp
     {
         static string _ffmpegPath = @"c:\Program Files\ffmpeg\bin\ffmpeg.exe";
         static bool _nogeo = false;
+        static bool _delete = false;
         static void Main(string[] args)
         {
 
@@ -18,9 +19,21 @@ namespace MyApp
             }
             else
             {
-                if (args[0] == "nogeo")
+                if (args[0] == "nogeo" || args[0] == "delete")
                 {
-                    _nogeo = true;
+                    if (args[0] == "nogeo")
+                        _nogeo = true;
+                    if (args[0] == "delete")
+                        _delete = true;
+
+                    if (args.Length == 2)
+                    {
+                        if (args[1] == "nogeo")
+                            _nogeo = true;
+                        if (args[1] == "delete")
+                            _delete = true;
+                    }
+
                     files = Directory.GetFiles(Environment.CurrentDirectory, "*.mp4");
                 }
                 else if (Directory.Exists(args[0]))
@@ -43,8 +56,8 @@ namespace MyApp
                 filesList.Add($"file '{file}'");
             }
             filesList.Sort();
-            
-            foreach(var file in filesList)
+
+            foreach (var file in filesList)
             {
                 Console.WriteLine(file);
             }
@@ -77,8 +90,15 @@ namespace MyApp
             {
                 StartInfo = psi
             };
-            proc.Start();
+            var myproc = proc.Start();
             proc.WaitForExit();
+            if(_delete && proc.ExitCode == 0)
+            {
+                foreach (var file in files)
+                {
+                    File.Delete(file);
+                }
+            }
             File.Delete(inputFiles);
         }
     }
