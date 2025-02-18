@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 
 namespace MyApp
 {
@@ -57,12 +58,17 @@ namespace MyApp
             List<string> matches = new List<string>();
             foreach (var file in filesList)
             {
+
                 //remove date from filename
                 var filename = Path.GetFileName(file);
+                if(filename.Length != 19) 
+                {
+                    continue;
+                }   
                 var name = filename.Remove(0, 9);
                 if (name.StartsWith("01"))
                 {
-                    if(matches.Count > 1)
+                    if (matches.Count > 1)
                     {
                         filesLists.Add(matches);
                     }
@@ -76,18 +82,23 @@ namespace MyApp
 
             }
 
-            if(matches.Count > 1)
+            if (matches.Count > 1)
             {
                 filesLists.Add(matches);
             }
 
 
-
+            if (filesLists.Count == 0)
+            {
+                Console.WriteLine("No filegroups found (ie 105545_GX010001.mp4, 113045_GX020001.mp4)");
+                return;
+            }
 
             foreach (var fileList in filesLists)
             {
-                Console.WriteLine("New Group:");
-                foreach(var file in fileList)
+
+                Console.WriteLine($"===={Environment.NewLine}New Group:");
+                foreach (var file in fileList)
                 {
                     Console.WriteLine(file);
                 }
@@ -115,44 +126,51 @@ namespace MyApp
                 string outputFile = Path.Combine(Path.GetDirectoryName(fileList[0])!, "_concat-" + Path.GetFileName(fileList[0]));
                 Console.WriteLine($"Output: {outputFile}");
 
-
-
-                ProcessStartInfo psi = new ProcessStartInfo();
-                psi.FileName = _ffmpegPath;
-
-                // ffmpeg -y -f concat -safe 0 -i test.txt -c copy -copy_unknown -map 0:v -map 0:a -map 0:2 -map 0:3 -map 0:4 -tag:2 tmcd -tag:3 gpmd -tag:4 fdsc test2.mp4
-                if (_nogeo)
+                try
                 {
-                    psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a  \"{outputFile}\"";
-                }
-                else
-                {
-                    psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a -map 0:3 -copy_unknown -tag:2 gpmd  \"{outputFile}\"";
-                }
 
-                // Console.WriteLine(psi.Arguments);
-                // return;
-                // psi.Arguments = $"-n -loglevel error -hwaccel cuda -stats -i \"{file}\" -c:v libx265 -c:a aac \"{tmpfile}\"";
-                
-                Process proc = new Process
-                {
-                    StartInfo = psi
-                };
-                var myproc = proc.Start();
-                proc.WaitForExit();
-                if (_delete && proc.ExitCode == 0)
-                {
-                    foreach (var file in fileList)
+                    ProcessStartInfo psi = new ProcessStartInfo();
+                    psi.FileName = _ffmpegPath;
+
+                    // ffmpeg -y -f concat -safe 0 -i test.txt -c copy -copy_unknown -map 0:v -map 0:a -map 0:2 -map 0:3 -map 0:4 -tag:2 tmcd -tag:3 gpmd -tag:4 fdsc test2.mp4
+                    if (_nogeo)
                     {
-                        Console.WriteLine($"Deleting {file}");
-                        File.Delete(file);
+                        psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a  \"{outputFile}\"";
+                    }
+                    else
+                    {
+                        psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a -map 0:3 -copy_unknown -tag:2 gpmd  \"{outputFile}\"";
+                    }
+
+                    // Console.WriteLine(psi.Arguments);
+                    // return;
+                    // psi.Arguments = $"-n -loglevel error -hwaccel cuda -stats -i \"{file}\" -c:v libx265 -c:a aac \"{tmpfile}\"";
+
+                    Process proc = new Process
+                    {
+                        StartInfo = psi
+                    };
+                    var myproc = proc.Start();
+                    proc.WaitForExit();
+                    if (_delete && proc.ExitCode == 0)
+                    {
+                        foreach (var file in fileList)
+                        {
+                            Console.WriteLine($"Deleting {file}");
+                            File.Delete(file);
+                        }
                     }
                 }
-                File.Delete(inputFiles);
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                finally
+                {
+                    File.Delete(inputFiles);
+                }
 
             }
-
-
 
         }
     }
