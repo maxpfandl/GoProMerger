@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection.Metadata;
+using System.Text.RegularExpressions;
 
 namespace MyApp
 {
@@ -56,28 +57,31 @@ namespace MyApp
 
             List<List<string>> filesLists = new List<List<string>>();
             List<string> matches = new List<string>();
+
+            Regex regexTime = new Regex(@"^\\d{6}_G\\w\\d\{6\}.mp4", RegexOptions.IgnoreCase);
+            Regex regexOrig = new Regex(@"^G\\w\\d\{6\}.mp4", RegexOptions.IgnoreCase);
+
             foreach (var file in filesList)
             {
 
                 //remove date from filename
                 var filename = Path.GetFileName(file);
-                if(filename.Length != 19) 
+                if (regexTime.IsMatch(filename))
                 {
-                    continue;
-                }   
-                var name = filename.Remove(0, 9);
-                if (name.StartsWith("01"))
-                {
-                    if (matches.Count > 1)
+                    var name = filename.Remove(0, 9);
+                    if (name.StartsWith("01"))
                     {
-                        filesLists.Add(matches);
+                        if (matches.Count > 1)
+                        {
+                            filesLists.Add(matches);
+                        }
+                        matches = new List<string>();
+                        matches.Add(file);
                     }
-                    matches = new List<string>();
-                    matches.Add(file);
-                }
-                else
-                {
-                    matches.Add(file);
+                    else
+                    {
+                        matches.Add(file);
+                    }
                 }
 
             }
@@ -123,7 +127,7 @@ namespace MyApp
                 File.WriteAllLines(inputFiles, concatFiles);
 
 
-                string outputFile = Path.Combine(Path.GetDirectoryName(fileList[0])!, Path.GetFileNameWithoutExtension(fileList[0])+ "_concat.mp4");
+                string outputFile = Path.Combine(Path.GetDirectoryName(fileList[0])!, Path.GetFileNameWithoutExtension(fileList[0]) + "_concat.mp4");
                 Console.WriteLine($"Output: {outputFile}");
 
                 try
