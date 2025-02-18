@@ -56,45 +56,57 @@ namespace MyApp
 
 
             List<List<string>> filesLists = new List<List<string>>();
-            List<string> matches = new List<string>();
+            Dictionary<string,List<string>> matches = new Dictionary<string, List<string>>();
 
-            Regex regexTime = new Regex(@"^\\d{6}_G\\w\\d\{6\}.mp4", RegexOptions.IgnoreCase);
-            Regex regexOrig = new Regex(@"^G\\w\\d\{6\}.mp4", RegexOptions.IgnoreCase);
+            Regex regexTime = new Regex(@"^\d{6}_G\w\d{6}.mp4", RegexOptions.IgnoreCase);
+            Regex regexOrig = new Regex(@"^G\w\d{6}.mp4", RegexOptions.IgnoreCase);
 
             foreach (var file in filesList)
             {
 
                 //remove date from filename
                 var filename = Path.GetFileName(file);
+                var name = "";
                 if (regexTime.IsMatch(filename))
                 {
-                    var name = filename.Remove(0, 9);
-                    if (name.StartsWith("01"))
-                    {
-                        if (matches.Count > 1)
-                        {
-                            filesLists.Add(matches);
-                        }
-                        matches = new List<string>();
-                        matches.Add(file);
-                    }
-                    else
-                    {
-                        matches.Add(file);
-                    }
+                    name = filename.Remove(0, 11);
+
+                }
+                else if (regexOrig.IsMatch(filename))
+                {
+                    name = filename.Remove(0, 4);
+                }
+                else
+                {
+                    Console.WriteLine($"Skipping {filename}");
+                    continue;
+                }
+
+                if(matches.ContainsKey(name))
+                {
+                    matches[name].Add(file);
+                }
+                else
+                {
+                    matches.Add(name, new List<string>(){file});
                 }
 
             }
 
-            if (matches.Count > 1)
+            foreach (var match in matches)
             {
-                filesLists.Add(matches);
+                if (match.Value.Count > 1)
+                {
+                    filesLists.Add(match.Value);
+                }
             }
+
+
 
 
             if (filesLists.Count == 0)
             {
-                Console.WriteLine("No filegroups found (ie 105545_GX010001.mp4, 113045_GX020001.mp4)");
+                Console.WriteLine("No filegroups found (ie 105545_GX010001.mp4, 113045_GX020001.mp4 or GX010001.mp4, GX020001.mp4)");
                 return;
             }
 
@@ -145,10 +157,6 @@ namespace MyApp
                     {
                         psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a -map 0:3 -copy_unknown -tag:2 gpmd  \"{outputFile}\"";
                     }
-
-                    // Console.WriteLine(psi.Arguments);
-                    // return;
-                    // psi.Arguments = $"-n -loglevel error -hwaccel cuda -stats -i \"{file}\" -c:v libx265 -c:a aac \"{tmpfile}\"";
 
                     Process proc = new Process
                     {
