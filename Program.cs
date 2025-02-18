@@ -123,7 +123,7 @@ namespace MyApp
                 File.WriteAllLines(inputFiles, concatFiles);
 
 
-                string outputFile = Path.Combine(Path.GetDirectoryName(fileList[0])!, "_concat-" + Path.GetFileName(fileList[0]));
+                string outputFile = Path.Combine(Path.GetDirectoryName(fileList[0])!, Path.GetFileNameWithoutExtension(fileList[0])+ "_concat.mp4");
                 Console.WriteLine($"Output: {outputFile}");
 
                 try
