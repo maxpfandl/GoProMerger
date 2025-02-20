@@ -9,7 +9,7 @@ namespace GoProMerger
 
     internal class Program
     {
-        static string _ffmpegPath = @"c:\Users\S6480\Downloads\ffmpeg-2025-02-17-git-b92577405b-full_build\bin\ffmpeg.exe";
+        static string _ffmpegPath = @"c:\Program Files\ffmpeg\bin\ffmpeg.exe";
         static bool _nogeo = false;
         static bool _nogroup = false;
         static bool _delete = false;

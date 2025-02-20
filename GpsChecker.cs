@@ -6,7 +6,7 @@ namespace GoProMerger
 {
     public class GpsChecker
     {
-        private static string _ffprobe = @"c:\Users\S6480\Downloads\ffmpeg-2025-02-17-git-b92577405b-full_build\bin\ffprobe.exe";
+        private static string _ffprobe = @"c:\Program Files\ffmpeg\bin\ffprobe.exe";
         public GpsChecker()
         {
             // Constructor logic here
