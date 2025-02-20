@@ -154,10 +154,6 @@ namespace GoProMerger
                 }
                 concatFiles.Sort();
 
-                foreach (var file in concatFiles)
-                {
-                    Console.WriteLine(file);
-                }
 
                 var inputFiles = Path.GetTempFileName();
                 File.WriteAllLines(inputFiles, concatFiles);
