@@ -12,4 +12,9 @@
     <DebugType>None</DebugType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Alturos.VideoInfo" Version="2.0.2" />
+  </ItemGroup>
+
+
 </Project>
