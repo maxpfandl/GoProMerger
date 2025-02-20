@@ -41,15 +41,16 @@ namespace GoProMerger
                         {
                             _nogroup = true;
                         }
-                        else if (arg == "help")
-                        {
-                            Console.WriteLine("GoProMerger [nogeo] [delete] [nogroup] [directory]");
-                            return;
-                        }
                         else if (Directory.Exists(arg))
                         {
                             files = Directory.GetFiles(arg, "*.mp4");
                         }
+                        else
+                        {
+                            Console.WriteLine("GoProMerger [nogeo] [delete] [nogroup] [directory]");
+                            return;
+                        }
+
                     }
                 }
 
