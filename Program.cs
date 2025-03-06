@@ -172,10 +172,12 @@ namespace GoProMerger
                     // ffmpeg -y -f concat -safe 0 -i test.txt -c copy -copy_unknown -map 0:v -map 0:a -map 0:2 -map 0:3 -map 0:4 -tag:2 tmcd -tag:3 gpmd -tag:4 fdsc test2.mp4
                     if (_nogeo || !await GpsChecker.HasGpsData(fileList[0]))
                     {
+                        Console.WriteLine("GPS Data Not Found: ignoring");
                         psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a  \"{outputFile}\"";
                     }
                     else
                     {
+                        Console.WriteLine($"GPS Data Found: merging");
                         psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a -map 0:3 -copy_unknown -tag:2 gpmd  \"{outputFile}\"";
                     }
 
