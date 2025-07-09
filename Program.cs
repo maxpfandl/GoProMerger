@@ -76,6 +76,7 @@ namespace GoProMerger
             Dictionary<string, List<string>> matches = new Dictionary<string, List<string>>();
 
             Regex regexTime = new Regex(@"^\d{6}_G\w\d{6}.mp4", RegexOptions.IgnoreCase);
+            Regex regexDateTime = new Regex(@"^\d{8}_\d{6}_G\w\d{6}.mp4", RegexOptions.IgnoreCase);
             Regex regexOrig = new Regex(@"^G\w\d{6}.mp4", RegexOptions.IgnoreCase);
 
             if (_nogroup)
@@ -93,6 +94,11 @@ namespace GoProMerger
                     if (regexTime.IsMatch(filename))
                     {
                         name = filename.Remove(0, 11);
+
+                    }
+                    else if (regexDateTime.IsMatch(filename))
+                    {
+                        name = filename.Remove(0, 20);
 
                     }
                     else if (regexOrig.IsMatch(filename))
