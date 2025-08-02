@@ -17,7 +17,11 @@ namespace GoProMerger
             var videoAnalyer = new VideoAnalyzer(_ffprobe);
             var analyzeResult = await videoAnalyer.GetVideoInfoAsync(path);
             var videoInfo = analyzeResult.VideoInfo;
-            if(videoInfo.Streams.Count() == 4 && videoInfo.Streams[3].Tags.HandlerName == "GoPro MET")
+            if (videoInfo.Streams.Count() == 4 && videoInfo.Streams[3].Tags.HandlerName == "GoPro MET")
+            {
+                return true;
+            }
+            else if (videoInfo.Streams.Count() == 3 && videoInfo.Streams[2].Tags.HandlerName == "GoPro MET")
             {
                 return true;
             }

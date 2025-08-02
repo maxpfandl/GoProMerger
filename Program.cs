@@ -10,10 +10,11 @@ namespace GoProMerger
     internal class Program
     {
         static string _ffmpegPath = @"c:\Program Files\ffmpeg\bin\ffmpeg.exe";
-        static bool _nogeo = false;
         static bool _nogroup = false;
         static bool _delete = false;
-        static async Task Main(string[] args)
+        static bool _reencode = false;
+
+        static void Main(string[] args)
         {
 
 
@@ -29,13 +30,15 @@ namespace GoProMerger
                 {
                     foreach (var arg in args)
                     {
-                        if (arg == "nogeo")
-                        {
-                            _nogeo = true;
-                        }
-                        else if (arg == "delete")
+
+
+                        if (arg == "delete")
                         {
                             _delete = true;
+                        }
+                        else if (arg == "reencode")
+                        {
+                            _reencode = true;
                         }
                         else if (arg == "nogroup")
                         {
@@ -47,7 +50,7 @@ namespace GoProMerger
                         }
                         else
                         {
-                            Console.WriteLine("GoProMerger [nogeo] [delete] [nogroup] [directory]");
+                            Console.WriteLine("GoProMerger [delete] [nogroup] [directory] [reencode]");
                             return;
                         }
 
@@ -62,15 +65,63 @@ namespace GoProMerger
 
             }
 
+
+
             if (files.Length == 0)
             {
                 Console.WriteLine("No files found");
                 return;
             }
 
+
+
             List<string> filesList = files.ToList();
             filesList.Sort();
 
+            if (_reencode)
+            {
+                var dir = "";
+                foreach (var file in files)
+                {
+                    dir = Path.Combine(Path.GetDirectoryName(file)!, "tmp");
+                    var outputFile = Path.Combine(dir, Path.GetFileNameWithoutExtension(file) + "_reenc" + Path.GetExtension(file));
+                    if (!Directory.Exists(dir))
+                        Directory.CreateDirectory(dir);
+
+                    ProcessStartInfo psi = new ProcessStartInfo();
+                    psi.FileName = _ffmpegPath;
+                    Console.WriteLine("Processing " + file);
+
+
+                    // -c:v hevc_nvenc -c:a aac -rc:v vbr -cq:v 29
+                    Console.WriteLine("Reencoding");
+                    psi.Arguments = $"-hide_banner -loglevel error -i \"{file}\" -c:v hevc_nvenc -c:a aac -rc:v vbr -cq:v 24 -map 0:v -map 0:a  \"{outputFile}\"";
+
+
+                    Process proc = new Process
+                    {
+                        StartInfo = psi
+                    };
+                    var myproc = proc.Start();
+                    proc.WaitForExit();
+
+                }
+
+                if (!_nogroup)
+                    return;
+                else //fetch tmp files and merge
+                {
+                    files = Directory.GetFiles(dir, "*.mp4");
+                    if (files.Length == 0)
+                    {
+                        Console.WriteLine("No files found");
+                        return;
+                    }
+                    filesList = files.ToList();
+                    filesList.Sort();
+                }
+
+            }
 
             List<List<string>> filesLists = new List<List<string>>();
             Dictionary<string, List<string>> matches = new Dictionary<string, List<string>>();
@@ -175,17 +226,10 @@ namespace GoProMerger
                     ProcessStartInfo psi = new ProcessStartInfo();
                     psi.FileName = _ffmpegPath;
 
+
                     // ffmpeg -y -f concat -safe 0 -i test.txt -c copy -copy_unknown -map 0:v -map 0:a -map 0:2 -map 0:3 -map 0:4 -tag:2 tmcd -tag:3 gpmd -tag:4 fdsc test2.mp4
-                    if (_nogeo || !await GpsChecker.HasGpsData(fileList[0]))
-                    {
-                        Console.WriteLine("GPS Data Not Found: ignoring");
-                        psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a  \"{outputFile}\"";
-                    }
-                    else
-                    {
-                        Console.WriteLine($"GPS Data Found: merging");
-                        psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a -map 0:3 -copy_unknown -tag:2 gpmd  \"{outputFile}\"";
-                    }
+                    Console.WriteLine("Merging without GPS");
+                    psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a  \"{outputFile}\"";
 
                     Process proc = new Process
                     {
