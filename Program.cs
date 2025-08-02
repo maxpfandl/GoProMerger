@@ -81,6 +81,7 @@ namespace GoProMerger
             if (_reencode)
             {
                 var dir = "";
+                int i = 1;
                 foreach (var file in files)
                 {
                     dir = Path.Combine(Path.GetDirectoryName(file)!, "tmp");
@@ -90,11 +91,10 @@ namespace GoProMerger
 
                     ProcessStartInfo psi = new ProcessStartInfo();
                     psi.FileName = _ffmpegPath;
-                    Console.WriteLine("Processing " + file);
+                    Console.WriteLine(i + "/" + files.Count() + ": Reencoding " + file);
 
 
                     // -c:v hevc_nvenc -c:a aac -rc:v vbr -cq:v 29
-                    Console.WriteLine("Reencoding");
                     psi.Arguments = $"-hide_banner -loglevel error -i \"{file}\" -c:v hevc_nvenc -c:a aac -rc:v vbr -cq:v 24 -map 0:v -map 0:a  \"{outputFile}\"";
 
 
@@ -104,6 +104,7 @@ namespace GoProMerger
                     };
                     var myproc = proc.Start();
                     proc.WaitForExit();
+                    i++;
 
                 }
 
