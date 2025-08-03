@@ -44,13 +44,19 @@ namespace GoProMerger
                         {
                             _nogroup = true;
                         }
+                        else if (arg == "youtube")
+                        {
+                            _reencode = true;
+                            _nogroup = true;
+                            _delete = true;
+                        }
                         else if (Directory.Exists(arg))
                         {
                             files = Directory.GetFiles(arg, "*.mp4");
                         }
                         else
                         {
-                            Console.WriteLine("GoProMerger [delete] [nogroup] [directory] [reencode]");
+                            Console.WriteLine("GoProMerger [delete] [nogroup] [directory] [reencode] [youtube]");
                             return;
                         }
 
