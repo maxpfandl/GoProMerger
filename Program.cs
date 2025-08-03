@@ -44,7 +44,7 @@ namespace GoProMerger
                         {
                             _nogroup = true;
                         }
-                        else if (arg == "youtube")
+                        else if (arg == "mixedmerge")
                         {
                             _reencode = true;
                             _nogroup = true;
@@ -56,7 +56,7 @@ namespace GoProMerger
                         }
                         else
                         {
-                            Console.WriteLine("GoProMerger [delete] [nogroup] [directory] [reencode] [youtube]");
+                            Console.WriteLine("GoProMerger [delete] [nogroup] [directory] [reencode] [mixedmerge]");
                             return;
                         }
 
