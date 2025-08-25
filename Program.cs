@@ -101,7 +101,8 @@ namespace GoProMerger
 
 
                     // -c:v hevc_nvenc -c:a aac -rc:v vbr -cq:v 29
-                    psi.Arguments = $"-hide_banner -loglevel error -i \"{file}\" -c:v hevc_nvenc -c:a aac -rc:v vbr -cq:v 17 -map 0:v -map 0:a  \"{outputFile}\"";
+                    psi.Arguments = $" -hide_banner -loglevel error -i \"{file}\" -c:v hevc_nvenc -c:a aac -rc:v vbr -cq:v 36 -qmin:v 40 -qmax:v 34 -map 0:v -map 0:a  \"{outputFile}\"";
+                    // 
 
 
                     Process proc = new Process
