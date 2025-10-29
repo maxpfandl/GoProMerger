@@ -14,6 +14,8 @@ namespace GoProMerger
         static bool _delete = false;
         static bool _reencode = false;
 
+        static bool _mergegpx = false;
+
         static void Main(string[] args)
         {
 
@@ -36,6 +38,10 @@ namespace GoProMerger
                         {
                             _delete = true;
                         }
+                        else if (arg == "mergegpx")
+                        {
+                            _mergegpx = true;
+                        }
                         else if (arg == "reencode")
                         {
                             _reencode = true;
@@ -56,10 +62,15 @@ namespace GoProMerger
                         }
                         else
                         {
-                            Console.WriteLine("GoProMerger [delete] [nogroup] [directory] [reencode] [mixedmerge]");
+                            Console.WriteLine("GoProMerger [delete] [nogroup] [directory] ([reencode] [mixedmerge]|[mergegpx])");
                             return;
                         }
 
+                    }
+                    if ((_reencode && _mergegpx))
+                    {
+                        Console.WriteLine("GoProMerger [delete] [nogroup] [directory] ([reencode] [mixedmerge]|[mergegpx])");
+                        return;
                     }
                 }
 
@@ -233,11 +244,18 @@ namespace GoProMerger
 
                     ProcessStartInfo psi = new ProcessStartInfo();
                     psi.FileName = _ffmpegPath;
+                    if (_mergegpx)
+                    {
+                         Console.WriteLine("Merging with GPS");
+                        psi.Arguments = $"-hide_banner -loglevel error -f concat -safe 0 -i \"{inputFiles}\" -map 0 -c copy -copy_unknown -tag:d:2 gpmd \"{outputFile}\"";
+                    }
 
-
-                    // ffmpeg -y -f concat -safe 0 -i test.txt -c copy -copy_unknown -map 0:v -map 0:a -map 0:2 -map 0:3 -map 0:4 -tag:2 tmcd -tag:3 gpmd -tag:4 fdsc test2.mp4
-                    Console.WriteLine("Merging without GPS");
-                    psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a  \"{outputFile}\"";
+                    else
+                    {
+                        // ffmpeg -y -f concat -safe 0 -i test.txt -c copy -copy_unknown -map 0:v -map 0:a -map 0:2 -map 0:3 -map 0:4 -tag:2 tmcd -tag:3 gpmd -tag:4 fdsc test2.mp4
+                        Console.WriteLine("Merging without GPS");
+                        psi.Arguments = $"-hide_banner -loglevel error -y -f concat -safe 0 -i \"{inputFiles}\" -c copy -map 0:v -map 0:a  \"{outputFile}\"";
+                    }
 
                     Process proc = new Process
                     {
